@@ -3,7 +3,6 @@ package applications;
 import util.FileSystemLogger;
 import util.TSPFileReader;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class Application01 {

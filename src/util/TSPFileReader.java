@@ -12,7 +12,7 @@ public class TSPFileReader {
      *
      * @return distance matrix of nodes
      * @throws FileNotFoundException where the file is not found
-     * @throws RuntimeException when no dimension is found in the file
+     * @throws RuntimeException      when no dimension is found in the file
      */
     public double[][] readTSPData() throws FileNotFoundException, RuntimeException {
 
@@ -30,7 +30,7 @@ public class TSPFileReader {
                 continue;
             }
             String[] splittedLine = line.split(" ");
-            if(splittedLine.length !=3) {
+            if (splittedLine.length != 3) {
                 continue;
             }
 
@@ -53,8 +53,8 @@ public class TSPFileReader {
 
         // Calculating distance matrix
         double[][] distanceMatrix = new double[dimension][dimension];
-        for(int i = 0; i < dimension; i++) {
-            for(int j = 0; j < i; j++) {
+        for (int i = 0; i < dimension; i++) {
+            for (int j = 0; j < i; j++) {
                 distanceMatrix[i][j] = Math.sqrt(Math.pow(nodes.get(i)[0] - nodes.get(j)[0], 2) + Math.pow(nodes.get(i)[1] - nodes.get(j)[1], 2));
                 distanceMatrix[j][i] = distanceMatrix[i][j];
             }
