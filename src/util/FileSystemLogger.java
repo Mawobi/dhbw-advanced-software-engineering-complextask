@@ -22,9 +22,8 @@ public class FileSystemLogger {
         logger = Logger.getLogger(name != null && !name.equals("") ? name : Logger.GLOBAL_LOGGER_NAME);
         logger.setLevel(Level.ALL);
 
-        FileHandler fh;
-
         // configure logger to write logs to file system
+        FileHandler fh;
         Path path = Paths.get("logs", logger.getName() + ".log");
 
         if (!Files.exists(path.getParent())) {
