@@ -1,4 +1,4 @@
-package filereader;
+package util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -16,8 +16,8 @@ public class TSPFileReader {
         // Initialize distance matrix
         double[][] dist = new double[n][n];
         // Fill distance matrix
-        for(int i=0; i<n; i++){
-            for(int j=0; j<i; j++){
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < i; j++) {
                 dist[i][j] = sc.nextDouble();
                 dist[j][i] = dist[i][j];
             }
