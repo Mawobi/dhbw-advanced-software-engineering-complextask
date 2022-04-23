@@ -1,21 +1,28 @@
 package filereader;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.util.Locale;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class TSPFileReader {
 
+    /**
+     * Reads a tsp file with nodes and returns a distance matrix of the nodes.
+     *
+     * @return distance matrix of nodes
+     * @throws FileNotFoundException where the file is not found
+     * @throws RuntimeException when no dimension is found in the file
+     */
     public double[][] readTSPData() throws FileNotFoundException, RuntimeException {
 
+        // File path
         File file = new File("src/resources/a280.tsp");
 
+        // Scanning for dimension/number of nodes in the tsp file
         Scanner dimensionScanner = new Scanner(file);
         int dimension = -1;
-        String line = "";
+        String line;
 
         while (dimensionScanner.hasNextLine()) {
             line = dimensionScanner.nextLine().trim();
@@ -25,17 +32,16 @@ public class TSPFileReader {
             }
         }
         dimensionScanner.close();
-
+        // If dimension is not found, throw exception
         if (dimension == -1) {
             throw new RuntimeException("Could not find dimension in file");
         }
 
-        double[][] dist = new double[dimension][dimension];
-
+        // Scanning for coordinates of nodes in the tsp file
         Scanner nodeScanner = new Scanner(file);
-
+        ArrayList<double[]> nodes = new ArrayList<>();
         while (nodeScanner.hasNextLine()) {
-            line = nodeScanner.nextLine().trim();
+            line = nodeScanner.nextLine().trim().replaceAll(" +", " ");
             String[] splittedLine = line.split(" ");
             if(splittedLine.length !=3) {
                 continue;
@@ -43,27 +49,25 @@ public class TSPFileReader {
 
             double[] node = new double[3];
             try {
-                node[0] = Double.parseDouble(splittedLine[0]);
-                node[1] = Double.parseDouble(splittedLine[1]);
-                node[2] = Double.parseDouble(splittedLine[2]);
+                Integer.parseInt(splittedLine[0]);
+                node[0] = Double.parseDouble(splittedLine[1]);
+                node[1] = Double.parseDouble(splittedLine[2]);
             } catch (NumberFormatException e) {
                 continue;
             }
-
-
+            nodes.add(node);
         }
         nodeScanner.close();
 
-//        while ((line = csvReader.readLine()) != null) {
-//            String[] lineArgs = line.split(",");
-//            for (int i = 0; i < n; i++) {
-//                for (int j = 0; j < i; j++) {
-//                    dist[i][j] = dimensionScanner.nextDouble();
-//                    dist[j][i] = dist[i][j];
-//                }
-//            }
-//        }
+        // Calculating distance matrix
+        double[][] distanceMatrix = new double[dimension][dimension];
+        for(int i = 0; i < dimension; i++) {
+            for(int j = 0; j < i; j++) {
+                distanceMatrix[i][j] = Math.sqrt(Math.pow(nodes.get(i)[0] - nodes.get(j)[0], 2) + Math.pow(nodes.get(i)[1] - nodes.get(j)[1], 2));
+                distanceMatrix[j][i] = distanceMatrix[i][j];
+            }
+        }
 
-        return dist;
+        return distanceMatrix;
     }
 }
