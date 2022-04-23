@@ -16,32 +16,19 @@ public class TSPFileReader {
      */
     public double[][] readTSPData() throws FileNotFoundException, RuntimeException {
 
-        // File path
         File file = new File("src/resources/a280.tsp");
-
-        // Scanning for dimension/number of nodes in the tsp file
-        Scanner dimensionScanner = new Scanner(file);
         int dimension = -1;
-        String line;
+        ArrayList<double[]> nodes = new ArrayList<>();
 
-        while (dimensionScanner.hasNextLine()) {
-            line = dimensionScanner.nextLine().trim();
+        // Scanning for dimension/number of nodes and the coordinates of nodes in the tsp file
+        Scanner scanner = new Scanner(file);
+        String line;
+        while (scanner.hasNextLine()) {
+            line = scanner.nextLine().trim().replaceAll(" +", " ");
             if (line.startsWith("DIMENSION:")) {
                 dimension = Integer.parseInt(line.split(" ")[1]);
-                break;
+                continue;
             }
-        }
-        dimensionScanner.close();
-        // If dimension is not found, throw exception
-        if (dimension == -1) {
-            throw new RuntimeException("Could not find dimension in file");
-        }
-
-        // Scanning for coordinates of nodes in the tsp file
-        Scanner nodeScanner = new Scanner(file);
-        ArrayList<double[]> nodes = new ArrayList<>();
-        while (nodeScanner.hasNextLine()) {
-            line = nodeScanner.nextLine().trim().replaceAll(" +", " ");
             String[] splittedLine = line.split(" ");
             if(splittedLine.length !=3) {
                 continue;
@@ -57,7 +44,12 @@ public class TSPFileReader {
             }
             nodes.add(node);
         }
-        nodeScanner.close();
+        scanner.close();
+
+        // If dimension is not found, throw exception
+        if (dimension == -1) {
+            throw new RuntimeException("Could not find dimension in file");
+        }
 
         // Calculating distance matrix
         double[][] distanceMatrix = new double[dimension][dimension];
