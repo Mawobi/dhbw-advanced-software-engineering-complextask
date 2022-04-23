@@ -9,4 +9,7 @@ public enum Configuration {
     // File paths
     public final String logDir = "logs";
     public final String tspPath = "src/resources/a280.tsp";
+
+    // Algorithm parameters
+    public final long bruteForceIterationCount = 100000000;
 }
