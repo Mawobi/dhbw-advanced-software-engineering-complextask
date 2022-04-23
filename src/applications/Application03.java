@@ -12,13 +12,7 @@ public class Application03 {
         logger.info("Application03 initialized");
     }
 
-    public static void main(String[] args) {
-        Application03 app;
-        try {
-            app = new Application03();
-        } catch (IOException e) {
-            System.out.println("Error while initializing Application03");
-            e.printStackTrace();
-        }
+    public static void main(String[] args) throws IOException {
+        Application03 app = new Application03();
     }
 }
