@@ -16,7 +16,7 @@ public class TSPFileReader {
      */
     public double[][] readTSPData() throws FileNotFoundException, RuntimeException {
 
-        File file = new File("src/resources/a280.tsp");
+        File file = new File(Configuration.INSTANCE.tspPath);
         int dimension = -1;
         ArrayList<double[]> nodes = new ArrayList<>();
 

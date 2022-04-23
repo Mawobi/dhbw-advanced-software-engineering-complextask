@@ -3,7 +3,6 @@ package util;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,7 +23,7 @@ public class FileSystemLogger {
 
         // configure logger to write logs to file system
         FileHandler fh;
-        Path path = Paths.get("logs", logger.getName() + ".log");
+        Path path = Path.of(Configuration.INSTANCE.logDir, logger.getName() + ".log");
 
         if (!Files.exists(path.getParent())) {
             Files.createDirectory(path.getParent());
