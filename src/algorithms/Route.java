@@ -2,12 +2,14 @@ package algorithms;
 
 public class Route {
     public final double totalCost;
+    private final int[] nodes;
 
     public Route(double[][] distanceMatrix, int[] nodes) {
-        this.totalCost = getTotalCost(distanceMatrix, nodes);
+        this.nodes = nodes;
+        this.totalCost = getTotalCost(distanceMatrix);
     }
 
-    private double getTotalCost(double[][] distanceMatrix, int[] nodes) {
+    private double getTotalCost(double[][] distanceMatrix) {
         double totalCost = 0;
 
         for (int i = 0; i < nodes.length - 1; i++) {
@@ -21,7 +23,9 @@ public class Route {
 
     @Override
     public String toString() {
-        // TODO implement
-        return super.toString();
+        StringBuilder routeString = new StringBuilder();
+        for (int node : nodes) routeString.append(node + 1).append(" » ");
+        routeString.append(nodes[0] + 1);
+        return routeString.toString();
     }
 }
