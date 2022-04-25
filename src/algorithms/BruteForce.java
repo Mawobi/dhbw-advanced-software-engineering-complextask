@@ -23,7 +23,6 @@ public class BruteForce {
         double[][] distanceMatrix = tspFileReader.readTSPData();
 
         Route bestRoute = generateRandomRoute(distanceMatrix);
-        double bestTravelingCost = Integer.MAX_VALUE;
 
         this.logger.info("=== Bruteforce TSP ===");
         this.logger.info("Starting " + Configuration.INSTANCE.bruteForceIterationCount + " iterations");
@@ -34,14 +33,13 @@ public class BruteForce {
 
             Route route = generateRandomRoute(distanceMatrix);
 
-            if (route.totalCost < bestTravelingCost) {
-                bestTravelingCost = route.totalCost;
+            if (route.totalCost < bestRoute.totalCost) {
                 bestRoute = route;
-                logger.info("Iteration " + i + " | " + bestTravelingCost);
+                logger.info("Iteration " + i + " | " + bestRoute.totalCost);
             }
         }
 
-        this.logger.info("Best cost " + bestTravelingCost + " with order: " + bestRoute);
+        this.logger.info("Best cost " + bestRoute.totalCost + " with order: " + bestRoute);
         this.logger.info("=== Bruteforce TSP End ===");
     }
 
@@ -54,7 +52,7 @@ public class BruteForce {
             nodeOrder[i] = node;
         }
 
-        return new Route(distanceMatrix, nodeOrder);
+        return new Route(nodeOrder, distanceMatrix);
     }
 
     private double calculateTravelingCost(ArrayList<Integer> order, double[][] distanceMatrix) {

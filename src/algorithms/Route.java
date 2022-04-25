@@ -2,9 +2,9 @@ package algorithms;
 
 public class Route {
     public final double totalCost;
-    private final int[] nodes;
+    public final int[] nodes;
 
-    public Route(double[][] distanceMatrix, int[] nodes) {
+    public Route(int[] nodes, double[][] distanceMatrix) {
         this.nodes = nodes;
         this.totalCost = getTotalCost(distanceMatrix);
     }
