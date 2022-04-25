@@ -11,5 +11,10 @@ public enum Configuration {
     public final String tspPath = "src/resources/a280.tsp";
 
     // Algorithm parameters
+    // Brute force:
     public final long bruteForceIterationCount = 100000000;
+
+    // PSO:
+    public final int particleCount = 16;
+    public final int psoIterationCount = 256;
 }
