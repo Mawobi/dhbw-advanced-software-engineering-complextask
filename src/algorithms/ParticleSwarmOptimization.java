@@ -3,6 +3,7 @@ package algorithms;
 import applications.Application02;
 import util.Configuration;
 import util.FileSystemLogger;
+import util.PSOCalculator;
 import util.TSPFileReader;
 
 import java.io.IOException;
@@ -54,7 +55,24 @@ public class ParticleSwarmOptimization {
             this.logger.info("Iteration " + i + " gBest | " + gBest.totalCost);
 
             for (Particle particle : this.particles) {
-                // TODO: update velocity and location
+                Route location = particle.getLocation();
+                // TODO: check how to get velocity
+                // Velocity velocity = particle.getVelocity();
+                Transposition[] velocity = new Transposition[]{};
+                Route pBest = particle.getPBest();
+
+                // update location with:
+                // newVelocity = w * velocity + r1c1 * (pBest - location) + r2c2 * (gBest - location)
+                // newLocation = location + newVelocity
+                Transposition[] inertia = PSOCalculator.multiply(Configuration.INSTANCE.inertiaWeight, velocity);
+                Transposition[] cognitiveRatio = PSOCalculator.getRatio(pBest, location, Configuration.INSTANCE.cognitiveRatioLearningRate);
+                Transposition[] socialRatio = PSOCalculator.getRatio(pBest, location, Configuration.INSTANCE.socialRatioLearningRate);
+
+                Transposition[] newVelocity = PSOCalculator.add(inertia, PSOCalculator.add(cognitiveRatio, socialRatio));
+                Route newLocation = PSOCalculator.applyTranspositions(location, newVelocity);
+
+                // TODO: maybe pass in newVelocity because particle also has to change its velocity
+                particle.move(newLocation);
             }
         }
 

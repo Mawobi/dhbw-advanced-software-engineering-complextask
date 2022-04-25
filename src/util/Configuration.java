@@ -17,4 +17,7 @@ public enum Configuration {
     // PSO:
     public final int particleCount = 16;
     public final int psoIterationCount = 256;
+    public final double inertiaWeight = 1; // w
+    public final double cognitiveRatioLearningRate = 1; // c1
+    public final double socialRatioLearningRate = 1; // c2
 }
