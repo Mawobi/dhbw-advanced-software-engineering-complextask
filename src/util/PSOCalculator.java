@@ -31,15 +31,14 @@ public class PSOCalculator {
      * Calculates factor * difference.
      */
     public static Transposition[] multiply(double factor, Transposition[] difference) {
-        if (factor <= 0 || factor > 1) {
+        if (factor < 0 || factor > 1) {
             throw new RuntimeException("Cannot multiply route difference with factor " + factor);
         }
         if (difference.length == 0) {
             throw new RuntimeException("Cannot multiply empty route difference");
         }
 
-        // TODO: implement
-        return (Transposition[]) new ArrayList<>().toArray();
+        return Arrays.copyOfRange(difference, 0, (int) Math.round(difference.length * factor));
     }
 
     /**
