@@ -14,8 +14,8 @@ public class BruteForce {
     private final ArrayList<Integer> nodesPool;
 
     public BruteForce() throws IOException {
-        logger = new FileSystemLogger(Application01.class.getName());
-        nodesPool = new ArrayList<>();
+        this.logger = new FileSystemLogger(Application01.class.getName());
+        this.nodesPool = new ArrayList<>();
     }
 
     public void start() throws FileNotFoundException {
@@ -25,9 +25,9 @@ public class BruteForce {
         ArrayList<Integer> bestOrder = new ArrayList<>();
         int bestTravelingCost = Integer.MAX_VALUE;
 
-        logger.info("=== Bruteforce TSP ===");
-        logger.info("Starting " + Configuration.INSTANCE.bruteForceIterationCount + " iterations");
-        logger.info("Best costs:");
+        this.logger.info("=== Bruteforce TSP ===");
+        this.logger.info("Starting " + Configuration.INSTANCE.bruteForceIterationCount + " iterations");
+        this.logger.info("Best costs:");
 
         for (int i = 0; i < Configuration.INSTANCE.bruteForceIterationCount; i++) {
             refillNodesPool(distanceMatrix.length);
@@ -45,8 +45,8 @@ public class BruteForce {
         StringBuilder orderString = new StringBuilder();
         for (int node : bestOrder) orderString.append(node + 1).append(" » ");
         orderString.append(bestOrder.get(0) + 1);
-        logger.info("Best cost " + bestTravelingCost + " with order: " + orderString);
-        logger.info("=== Bruteforce TSP End ===");
+        this.logger.info("Best cost " + bestTravelingCost + " with order: " + orderString);
+        this.logger.info("=== Bruteforce TSP End ===");
     }
 
     private ArrayList<Integer> generateRandomNodeOrder() {
@@ -76,14 +76,14 @@ public class BruteForce {
     }
 
     private void refillNodesPool(int dimension) {
-        nodesPool.clear();
+        this.nodesPool.clear();
         for (int i = 0; i < dimension; i++) {
-            nodesPool.add(i);
+            this.nodesPool.add(i);
         }
     }
 
     private int getRandomNodeFromPool() {
-        if (nodesPool.size() == 0) return -1;
-        return nodesPool.remove(Configuration.INSTANCE.randomGenerator.nextInt(0, nodesPool.size() - 1));
+        if (this.nodesPool.size() == 0) return -1;
+        return this.nodesPool.remove(Configuration.INSTANCE.randomGenerator.nextInt(0, nodesPool.size() - 1));
     }
 }
