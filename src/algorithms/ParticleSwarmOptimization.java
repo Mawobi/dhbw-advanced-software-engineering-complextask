@@ -63,6 +63,9 @@ public class ParticleSwarmOptimization {
         this.logger.info("=== Particle Swarm Optimization TSP END ===");
     }
 
+    /**
+     * @return Particle route with the smallest total cost.
+     */
     private Route getGBest() {
         Route best = null;
 
