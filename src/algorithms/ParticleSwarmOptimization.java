@@ -59,7 +59,7 @@ public class ParticleSwarmOptimization {
         }
 
         Route gBest = getGBest();
-        this.logger.info("gBest: " + gBest);
+        this.logger.info("gBest | " + gBest);
         this.logger.info("=== Particle Swarm Optimization TSP END ===");
     }
 
