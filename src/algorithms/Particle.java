@@ -5,15 +5,15 @@ public class Particle {
     }
 
     public Route getLocation() {
-        return new Route(new int[]{1, 2});
+        return new Route(new int[]{1, 2}, new double[][]{});
     }
 
     public Velocity getVelocity() {
-        return new Velocity(new Route(new int[]{1, 2}), new Route(new int[]{1, 2}));
+        return new Velocity(new Route(new int[]{1, 2}, new double[][]{}), new Route(new int[]{1, 2}, new double[][]{}));
     }
 
     public Route getPBest() {
-        return new Route(new int[]{1, 2});
+        return new Route(new int[]{1, 2}, new double[][]{});
     }
 
     public void calculatePBest() {
