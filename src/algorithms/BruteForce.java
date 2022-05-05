@@ -22,8 +22,7 @@ public class BruteForce {
         TSPFileReader tspFileReader = new TSPFileReader();
         double[][] distanceMatrix = tspFileReader.readTSPData();
 
-        ArrayList<Integer> bestOrder = new ArrayList<>();
-        int bestTravelingCost = Integer.MAX_VALUE;
+        Route bestRoute = getNewRandomRoute(distanceMatrix);
 
         this.logger.info("=== Bruteforce TSP ===");
         this.logger.info("Starting " + Configuration.INSTANCE.bruteForceIterationCount + " iterations");
@@ -32,47 +31,28 @@ public class BruteForce {
         for (int i = 0; i < Configuration.INSTANCE.bruteForceIterationCount; i++) {
             refillNodesPool(distanceMatrix.length);
 
-            ArrayList<Integer> order = generateRandomNodeOrder();
-            int travelingCost = calculateTravelingCost(order, distanceMatrix);
+            Route route = getNewRandomRoute(distanceMatrix);
 
-            if (travelingCost < bestTravelingCost) {
-                bestTravelingCost = travelingCost;
-                bestOrder = order;
-                logger.info("Iteration " + i + " | " + bestTravelingCost);
+            if (route.totalCost < bestRoute.totalCost) {
+                bestRoute = route;
+                logger.info("Iteration " + i + " | " + bestRoute.totalCost);
             }
         }
 
-        StringBuilder orderString = new StringBuilder();
-        for (int node : bestOrder) orderString.append(node + 1).append(" » ");
-        orderString.append(bestOrder.get(0) + 1);
-        this.logger.info("Best cost " + bestTravelingCost + " with order: " + orderString);
+        this.logger.info(bestRoute.toString());
         this.logger.info("=== Bruteforce TSP End ===");
     }
 
-    private ArrayList<Integer> generateRandomNodeOrder() {
-        ArrayList<Integer> order = new ArrayList<>();
+    private Route getNewRandomRoute(double[][] distanceMatrix) {
+        int[] nodeOrder = new int[distanceMatrix.length];
 
-        while (true) {
+        for (int i = 0; ; i++) {
             int node = getRandomNodeFromPool();
             if (node == -1) break;
-            order.add(node);
+            nodeOrder[i] = node;
         }
 
-        return order;
-    }
-
-    private int calculateTravelingCost(ArrayList<Integer> order, double[][] distanceMatrix) {
-        if (order.size() <= 1) return 0;
-        int cost = 0;
-
-        for (int i = 0; i < order.size() - 1; i++) {
-            int from = order.get(i);
-            int to = order.get(i + 1);
-            cost += distanceMatrix[from][to];
-        }
-
-        cost += distanceMatrix[order.get(order.size() - 1)][order.get(0)];
-        return cost;
+        return new Route(nodeOrder, distanceMatrix);
     }
 
     private void refillNodesPool(int dimension) {

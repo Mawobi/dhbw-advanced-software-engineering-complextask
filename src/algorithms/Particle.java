@@ -1,26 +1,39 @@
 package algorithms;
 
 public class Particle {
-    public Particle(Route initialLocation) {
+    private Route pBest;
+    private Route location;
+    private Velocity velocity; // TODO: Transposition?
+
+    public Particle(Route initialLocation, Velocity initialVelocity) {
+        this.pBest = initialLocation;
+        this.location = initialLocation;
+        this.velocity = initialVelocity;
     }
 
     public Route getLocation() {
-        return new Route(new int[]{1, 2}, new double[][]{});
+        return this.location;
     }
 
     public Velocity getVelocity() {
-        return new Velocity(new Route(new int[]{1, 2}, new double[][]{}), new Route(new int[]{1, 2}, new double[][]{}));
+        return this.velocity;
+    }
+
+    public void setVelocity(Velocity velocity) {
+        this.velocity = velocity;
     }
 
     public Route getPBest() {
-        return new Route(new int[]{1, 2}, new double[][]{});
+        return this.pBest;
     }
 
     public void calculatePBest() {
-
+        if(this.location.totalCost < this.pBest.totalCost) {
+            this.pBest = this.location;
+        }
     }
 
     public void move(Route newLocation) {
-
+        this.location = newLocation;
     }
 }
