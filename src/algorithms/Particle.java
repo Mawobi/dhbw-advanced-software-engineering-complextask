@@ -3,11 +3,12 @@ package algorithms;
 public class Particle {
     private Route pBest;
     private Route location;
-    private Velocity velocity;
+    private Velocity velocity; // TODO: Transposition?
 
-    public Particle(Route initialLocation) {
+    public Particle(Route initialLocation, Velocity initialVelocity) {
         this.pBest = initialLocation;
         this.location = initialLocation;
+        this.velocity = initialVelocity;
     }
 
     public Route getLocation() {
@@ -16,6 +17,10 @@ public class Particle {
 
     public Velocity getVelocity() {
         return this.velocity;
+    }
+
+    public void setVelocity(Velocity velocity) {
+        this.velocity = velocity;
     }
 
     public Route getPBest() {

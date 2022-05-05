@@ -10,4 +10,6 @@ public class Velocity {
     public int[][] getValue() {
         return this.velocity;
     }
+
+
 }

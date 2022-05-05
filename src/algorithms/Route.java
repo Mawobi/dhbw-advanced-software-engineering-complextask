@@ -24,6 +24,7 @@ public class Route {
     @Override
     public String toString() {
         StringBuilder routeString = new StringBuilder();
+        routeString.append("Best cost ").append(this.totalCost).append(" with order: ");
         for (int node : nodes) routeString.append(node + 1).append(" » ");
         routeString.append(nodes[0] + 1);
         return routeString.toString();
