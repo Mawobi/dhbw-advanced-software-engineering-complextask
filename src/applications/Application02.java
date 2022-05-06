@@ -1,13 +1,13 @@
 package applications;
 
 
-import algorithms.ParticleSwarmOptimization;
+import algorithms.AntColonyOptimization;
 
 import java.io.IOException;
 
 public class Application02 {
     public static void main(String[] args) throws IOException {
-        ParticleSwarmOptimization pso = new ParticleSwarmOptimization();
-        pso.start();
+        AntColonyOptimization aco = new AntColonyOptimization();
+        aco.start();
     }
 }

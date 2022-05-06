@@ -1,7 +1,6 @@
 package util;
 
 import algorithms.Route;
-import algorithms.Transposition;
 
 import java.util.ArrayList;
 import java.util.Arrays;
