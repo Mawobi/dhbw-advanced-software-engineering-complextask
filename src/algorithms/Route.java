@@ -7,6 +7,7 @@ public class Route {
     public Route(int[] nodes, double[][] distanceMatrix) {
         this.nodes = nodes;
         this.totalCost = getTotalCost(distanceMatrix);
+        this.nodes = nodes;
     }
 
     private double getTotalCost(double[][] distanceMatrix) {

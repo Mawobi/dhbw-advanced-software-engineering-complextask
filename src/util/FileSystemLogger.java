@@ -31,7 +31,7 @@ public class FileSystemLogger {
 
         fh = new FileHandler(path.toString());
         System.setProperty("java.util.logging.SimpleFormatter.format",
-                "%1$tF %1$tT %4$s %2$s %5$s%6$s%n");
+                "%1$tF %1$tT %4$s %5$s%6$s%n");
         fh.setFormatter(new SimpleFormatter());
         logger.addHandler(fh);
     }
