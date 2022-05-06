@@ -14,7 +14,7 @@ public class BruteForce {
     private final ArrayList<Integer> nodesPool;
 
     public BruteForce() throws IOException {
-        this.logger = new FileSystemLogger(Application01.class.getName());
+        this.logger = new FileSystemLogger(BruteForce.class.getName());
         this.nodesPool = new ArrayList<>();
     }
 

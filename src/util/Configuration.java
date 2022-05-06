@@ -23,6 +23,4 @@ public enum Configuration {
     public final double antFactor = 0.8;        // no ants per node
     public final double randomFactor = 0.01;    // introducing randomness
     public final int maximumIterations = 1000;
-    public final int numberOfAnts = 42; // TODO: remove too
-    public final int numberOfCities = 42; //TODO: delete -> distanceMatrix.size im Konstruktor von ACO
 }
