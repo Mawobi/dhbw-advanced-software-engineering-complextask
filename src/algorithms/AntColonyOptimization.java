@@ -14,13 +14,8 @@ public class AntColonyOptimization {
     private final double[][] distanceMatrix;
     private final double[][] trails;
     private final List<Ant> ants = new ArrayList<>();
-    private final double[] probabilities;
-    private final int numberOfAnts;
-    public StringBuilder stringBuilder = new StringBuilder();
-    private int currentIndex;
 
-    private int[] bestTourOrder;
-    private double bestTourLength;
+    private Route bestTour;
 
     public AntColonyOptimization() throws IOException {
         this.logger = new FileSystemLogger(AntColonyOptimization.class.getName());
@@ -28,139 +23,132 @@ public class AntColonyOptimization {
         TSPFileReader tspFileReader = new TSPFileReader();
         this.distanceMatrix = tspFileReader.readTSPData();
 
-        this.trails = new double[distanceMatrix.length][distanceMatrix.length];
-        this.probabilities = new double[distanceMatrix.length];
-        this.numberOfAnts = (int) (distanceMatrix.length * Configuration.INSTANCE.antFactor);
+        this.trails = new double[this.distanceMatrix.length][this.distanceMatrix.length];
 
-        for (int i = 0; i < this.numberOfAnts; i++) {
-            this.ants.add(new Ant(distanceMatrix.length));
+        // initialize pheromones
+        for (double[] row : this.trails) {
+            Arrays.fill(row, Configuration.INSTANCE.initialPheromoneValue);
+        }
+
+        // initialize ants
+        int numberOfAnts = (int) (this.distanceMatrix.length * Configuration.INSTANCE.antFactor);
+        for (int i = 0; i < numberOfAnts; i++) {
+            this.ants.add(new Ant(this.distanceMatrix));
         }
     }
 
     public void start() {
         long runtimeStart = System.currentTimeMillis();
 
-        setupAnts();
-        clearTrails();
-
         for (int i = 0; i < Configuration.INSTANCE.maximumIterations; i++) {
+            Route currentBestTour = this.bestTour;
             moveAnts();
             updateTrails();
             updateBest();
-        }
 
-        stringBuilder.append("\nbest tour length | ").append((bestTourLength - distanceMatrix.length));
-        stringBuilder.append("\nbest tour order  | ").append(Arrays.toString(bestTourOrder));
-        stringBuilder.append("\nruntime          | ").append(System.currentTimeMillis() - runtimeStart).append(" ms");
-
-        this.logger.info(stringBuilder.toString());
-    }
-
-    private void setupAnts() {
-        for (int i = 0; i < this.numberOfAnts; i++) {
-            for (Ant ant : ants) {
-                ant.clear();
-                ant.visitCity(-1, Configuration.INSTANCE.randomGenerator.nextInt(0, distanceMatrix.length - 1));
+            if (currentBestTour != null && this.bestTour.getTotalCost() < currentBestTour.getTotalCost()) {
+                this.logger.info("Found new best | Iteration " + i + " | " + this.bestTour);
             }
         }
-        currentIndex = 0;
+
+        this.logger.info("Best tour | " + this.bestTour);
+        this.logger.info("runtime | " + (System.currentTimeMillis() - runtimeStart) + " ms");
     }
 
     private void moveAnts() {
-        for (int i = currentIndex; i < distanceMatrix.length - 1; i++) {
-            for (Ant ant : ants) {
-                ant.visitCity(currentIndex, selectNextCity(ant));
+        for (Ant ant : ants) {
+            ant.trail.clear();
+
+            // it does not care which city is visited first, but to speed up calculation
+            // we will use 0 instead of a random generated value
+            ant.trail.visitCity(0);
+
+            for (int i = 0; i < this.distanceMatrix.length - 1; i++) {
+                ant.trail.visitCity(selectNextCity(ant));
             }
-            currentIndex++;
         }
     }
 
     private int selectNextCity(Ant ant) {
-        int t = Configuration.INSTANCE.randomGenerator.nextInt(0, distanceMatrix.length - currentIndex);
         if (Configuration.INSTANCE.randomGenerator.nextDouble() < Configuration.INSTANCE.randomFactor) {
-            int cityIndex = -999;
+            int randomCity = Configuration.INSTANCE.randomGenerator.nextInt(0, this.distanceMatrix.length - 1);
 
-            for (int i = 0; i < distanceMatrix.length; i++) {
-                if (i == t && !ant.visited(i)) {
-                    cityIndex = i;
-                    break;
-                }
-            }
-
-            if (cityIndex != -999) {
-                return cityIndex;
+            if (!ant.trail.visited(randomCity)) {
+                return randomCity;
             }
         }
 
-        calculateProbabilities(ant);
+        double[] probabilities = calculateProbabilities(ant);
 
         double randomNumber = Configuration.INSTANCE.randomGenerator.nextDouble();
         double total = 0;
 
-        for (int i = 0; i < distanceMatrix.length; i++) {
+        for (int i = 0; i < this.distanceMatrix.length; i++) {
             total += probabilities[i];
             if (total >= randomNumber) {
                 return i;
             }
         }
 
-        throw new RuntimeException("runtime exception | other cities");
+        throw new RuntimeException("runtime exception | unable to select next city");
     }
 
-    public void calculateProbabilities(Ant ant) {
-        int i = ant.trail[currentIndex];
+    public double[] calculateProbabilities(Ant ant) {
+        double[] probabilities = new double[this.distanceMatrix.length];
+
+        if (ant.trail.getSize() == 0) {
+            throw new RuntimeException("Unable to calculate probabilities for empty ant trail");
+        }
+
+        int i = ant.trail.get(ant.trail.getSize() - 1);
         double pheromone = 0.0;
 
-        for (int l = 0; l < distanceMatrix.length; l++) {
-            if (!ant.visited(l)) {
-                pheromone += Math.pow(trails[i][l], Configuration.INSTANCE.alpha) * Math.pow(1.0 / distanceMatrix[i][l], Configuration.INSTANCE.beta);
+        for (int l = 0; l < this.distanceMatrix.length; l++) {
+            if (!ant.trail.visited(l)) {
+                // TODO: Mit Herrn Müller besprechen, wie wir damit umgehen sollen
+                if (this.distanceMatrix[i][l] == 0) continue;
+                pheromone += Math.pow(this.trails[i][l], Configuration.INSTANCE.alpha) * Math.pow(1.0 / this.distanceMatrix[i][l], Configuration.INSTANCE.beta);
             }
         }
 
-        for (int j = 0; j < distanceMatrix.length; j++) {
-            if (ant.visited(j)) {
-                probabilities[j] = 0.0;
-            } else {
-                double numerator = Math.pow(trails[i][j], Configuration.INSTANCE.alpha) * Math.pow(1.0 / distanceMatrix[i][j], Configuration.INSTANCE.beta);
+        for (int j = 0; j < probabilities.length; j++) {
+            if (!ant.trail.visited(j)) {
+                if (pheromone == 0 || Double.isInfinite(pheromone)) {
+                    throw new RuntimeException("Error while calculation probabilities. Division with zero or infinity.");
+                }
+
+                double numerator = Math.pow(trails[i][j], Configuration.INSTANCE.alpha) * Math.pow(1.0 / this.distanceMatrix[i][j], Configuration.INSTANCE.beta);
                 probabilities[j] = numerator / pheromone;
             }
         }
+
+        return probabilities;
     }
 
     private void updateTrails() {
-        for (int i = 0; i < distanceMatrix.length; i++) {
-            for (int j = 0; j < distanceMatrix.length; j++) {
-                trails[i][j] *= Configuration.INSTANCE.evaporation;
+        // evaporate trails
+        for (int i = 0; i < this.distanceMatrix.length; i++) {
+            for (int j = 0; j < this.distanceMatrix[0].length; j++) {
+                this.trails[i][j] *= Configuration.INSTANCE.evaporation;
             }
         }
 
-        for (Ant ant : ants) {
-            double contribution = Configuration.INSTANCE.q / ant.trailLength(distanceMatrix);
-            for (int i = 0; i < distanceMatrix.length - 1; i++) {
-                trails[ant.trail[i]][ant.trail[i + 1]] += contribution;
+        for (Ant ant : this.ants) {
+            double contribution = Configuration.INSTANCE.q / ant.trail.getTotalCost();
+            for (int i = 0; i < this.distanceMatrix.length - 1; i++) {
+                this.trails[ant.trail.get(i)][ant.trail.get(i + 1)] += contribution;
             }
-            trails[ant.trail[distanceMatrix.length - 1]][ant.trail[0]] += contribution;
+            this.trails[ant.trail.get(this.distanceMatrix.length - 1)][ant.trail.get(0)] += contribution;
         }
     }
 
     private void updateBest() {
-        if (bestTourOrder == null) {
-            bestTourOrder = ants.get(0).trail;
-            bestTourLength = ants.get(0).trailLength(distanceMatrix);
-        }
+        double bestTourCost = this.bestTour != null ? this.bestTour.getTotalCost() : Integer.MAX_VALUE;
 
-        for (Ant ant : ants) {
-            if (ant.trailLength(distanceMatrix) < bestTourLength) {
-                bestTourLength = ant.trailLength(distanceMatrix);
-                bestTourOrder = ant.trail.clone();
-            }
-        }
-    }
-
-    private void clearTrails() {
-        for (int i = 0; i < distanceMatrix.length; i++) {
-            for (int j = 0; j < distanceMatrix.length; j++) {
-                trails[i][j] = Configuration.INSTANCE.initialPheromoneValue;
+        for (Ant ant : this.ants) {
+            if (ant.trail.getTotalCost() < bestTourCost) {
+                this.bestTour = new Route(ant.trail);
+                bestTourCost = this.bestTour.getTotalCost();
             }
         }
     }
