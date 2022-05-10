@@ -41,9 +41,14 @@ public class AntColonyOptimization {
         long runtimeStart = System.currentTimeMillis();
 
         for (int i = 0; i < Configuration.INSTANCE.maximumIterations; i++) {
+            Route currentBest = this.bestTour;
             moveAnts();
             updateTrails();
             updateBest();
+
+            if (currentBest != null && this.bestTour.getTotalCost() < currentBest.getTotalCost()) {
+                this.logger.info("Found new best | Iteration " + i + " | " + this.bestTour);
+            }
         }
 
         this.logger.info("Best tour | " + this.bestTour);
@@ -143,7 +148,7 @@ public class AntColonyOptimization {
         for (Ant ant : this.ants) {
             if (ant.trail.getTotalCost() < bestTourCost) {
                 this.bestTour = new Route(ant.trail);
-                this.logger.info("Found new best | " + this.bestTour);
+                bestTourCost = this.bestTour.getTotalCost();
             }
         }
     }
