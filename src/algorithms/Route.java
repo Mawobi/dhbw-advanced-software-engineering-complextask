@@ -44,6 +44,10 @@ public class Route {
         this.cities.clear();
     }
 
+    public int getSize() {
+        return this.cities.size();
+    }
+
     public int get(int index) {
         return this.cities.get(index);
     }

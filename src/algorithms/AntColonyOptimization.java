@@ -16,7 +16,6 @@ public class AntColonyOptimization {
     private final List<Ant> ants = new ArrayList<>();
     private final double[] probabilities;
     private final int numberOfAnts;
-    private int currentIndex = 0;
 
     private Route bestTour;
 
@@ -95,7 +94,7 @@ public class AntColonyOptimization {
     }
 
     public void calculateProbabilities(Ant ant) {
-        int i = ant.trail[this.currentIndex];
+        int i = ant.trail.getSize();
         double pheromone = 0.0;
 
         for (int l = 0; l < this.distanceMatrix.length; l++) {
