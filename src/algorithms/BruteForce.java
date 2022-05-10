@@ -1,6 +1,5 @@
 package algorithms;
 
-import applications.Application01;
 import util.Configuration;
 import util.FileSystemLogger;
 import util.TSPFileReader;
@@ -33,9 +32,9 @@ public class BruteForce {
 
             Route route = getNewRandomRoute(distanceMatrix);
 
-            if (route.totalCost < bestRoute.totalCost) {
+            if (route.getTotalCost() < bestRoute.getTotalCost()) {
                 bestRoute = route;
-                logger.info("Iteration " + i + " | " + bestRoute.totalCost);
+                logger.info("Iteration " + i + " | " + bestRoute.getTotalCost());
             }
         }
 
