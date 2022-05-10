@@ -53,7 +53,7 @@ public class AntColonyOptimization {
         stringBuilder.append("\nbest tour order  | ").append(Arrays.toString(bestTourOrder));
         stringBuilder.append("\nruntime          | ").append(System.currentTimeMillis() - runtimeStart).append(" ms");
 
-        System.out.println(stringBuilder);
+        this.logger.info(stringBuilder.toString());
     }
 
     private void setupAnts() {
