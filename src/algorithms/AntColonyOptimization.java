@@ -30,7 +30,7 @@ public class AntColonyOptimization {
         this.numberOfAnts = (int) (this.distanceMatrix.length * Configuration.INSTANCE.antFactor);
 
         // initialize pheromones
-        for (double[] row : this.distanceMatrix)
+        for (double[] row : this.trails)
             Arrays.fill(row, Configuration.INSTANCE.initialPheromoneValue);
 
         // initialize ants
@@ -90,7 +90,7 @@ public class AntColonyOptimization {
             }
         }
 
-        throw new RuntimeException("runtime exception | other cities");
+        throw new RuntimeException("runtime exception | unable to select next city");
     }
 
     public void calculateProbabilities(Ant ant) {
@@ -99,6 +99,8 @@ public class AntColonyOptimization {
 
         for (int l = 0; l < this.distanceMatrix.length; l++) {
             if (!ant.trail.visited(l)) {
+                // TODO: Mit Herrn Müller besprechen, wie wir damit umgehen sollen
+                if (this.distanceMatrix[i][l] == 0) continue;
                 pheromone += Math.pow(this.trails[i][l], Configuration.INSTANCE.alpha) * Math.pow(1.0 / this.distanceMatrix[i][l], Configuration.INSTANCE.beta);
             }
         }
@@ -107,6 +109,10 @@ public class AntColonyOptimization {
             if (ant.trail.visited(j)) {
                 this.probabilities[j] = 0.0;
             } else {
+                if (pheromone == 0 || Double.isInfinite(pheromone)) {
+                    throw new RuntimeException("Error while calculation probabilities. Division with zero or infinity.");
+                }
+
                 double numerator = Math.pow(trails[i][j], Configuration.INSTANCE.alpha) * Math.pow(1.0 / this.distanceMatrix[i][j], Configuration.INSTANCE.beta);
                 this.probabilities[j] = numerator / pheromone;
             }
