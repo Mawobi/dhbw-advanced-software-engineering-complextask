@@ -1,32 +1,59 @@
 package algorithms;
 
-public class Route {
-    public final double totalCost;
-    public final int[] nodes;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-    public Route(int[] nodes, double[][] distanceMatrix) {
-        this.nodes = nodes;
-        this.totalCost = getTotalCost(distanceMatrix);
+public class Route {
+    public final double[][] distanceMatrix;
+    private final List<Integer> cities = new ArrayList<>();
+
+    public Route(double[][] distanceMatrix) {
+        this.distanceMatrix = distanceMatrix;
     }
 
-    private double getTotalCost(double[][] distanceMatrix) {
+    public Route(int[] cities, double[][] distanceMatrix) {
+        this.cities.addAll(Arrays.stream(cities).boxed().toList());
+        this.distanceMatrix = distanceMatrix;
+    }
+
+    public Route(Route route) {
+        this(route.cities.stream().mapToInt(Integer::intValue).toArray(), route.distanceMatrix);
+    }
+
+    public double getTotalCost() {
         double totalCost = 0;
 
-        for (int i = 0; i < nodes.length - 1; i++) {
-            totalCost += distanceMatrix[nodes[i]][nodes[i + 1]];
+        for (int i = 0; i < this.cities.size() - 1; i++) {
+            totalCost += this.distanceMatrix[this.cities.get(i)][this.cities.get(i + 1)];
         }
 
-        totalCost += distanceMatrix[nodes[nodes.length - 1]][nodes[0]];
-
+        totalCost += this.distanceMatrix[this.cities.get(this.cities.size() - 1)][this.cities.get(0)];
         return totalCost;
+    }
+
+    public void visitCity(int city) {
+        if (!this.cities.contains(city)) this.cities.add(city);
+    }
+
+    public boolean visited(int city) {
+        return this.cities.contains(city);
+    }
+
+    public void clear() {
+        this.cities.clear();
+    }
+
+    public int get(int index) {
+        return this.cities.get(index);
     }
 
     @Override
     public String toString() {
         StringBuilder routeString = new StringBuilder();
-        routeString.append("Best cost ").append(this.totalCost).append(" with order: ");
-        for (int node : nodes) routeString.append(node + 1).append(" » ");
-        routeString.append(nodes[0] + 1);
+        routeString.append("Cost ").append(this.getTotalCost()).append(" with order: ");
+        for (int node : this.cities) routeString.append(node + 1).append(" » ");
+        routeString.append(this.cities.get(0) + 1);
         return routeString.toString();
     }
 }
