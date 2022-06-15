@@ -1,5 +1,6 @@
 package algorithms;
 
+import util.ACOParameters;
 import util.Configuration;
 import util.FileSystemLogger;
 import util.TSPFileReader;
@@ -14,10 +15,11 @@ public class AntColonyOptimization {
     private final double[][] distanceMatrix;
     private final double[][] trails;
     private final List<Ant> ants = new ArrayList<>();
-
+    private final ACOParameters parameters;
     private Route bestTour;
 
-    public AntColonyOptimization() throws IOException {
+    public AntColonyOptimization(ACOParameters parameters) throws IOException {
+        this.parameters = parameters;
         this.logger = new FileSystemLogger(AntColonyOptimization.class.getName());
 
         TSPFileReader tspFileReader = new TSPFileReader();
@@ -27,20 +29,22 @@ public class AntColonyOptimization {
 
         // initialize pheromones
         for (double[] row : this.trails) {
-            Arrays.fill(row, Configuration.INSTANCE.initialPheromoneValue);
+            Arrays.fill(row, this.parameters.initialPheromoneValue);
         }
 
         // initialize ants
-        int numberOfAnts = (int) (this.distanceMatrix.length * Configuration.INSTANCE.antFactor);
+        int numberOfAnts = (int) (this.distanceMatrix.length * this.parameters.antFactor);
         for (int i = 0; i < numberOfAnts; i++) {
             this.ants.add(new Ant(this.distanceMatrix));
         }
     }
 
-    public void start() {
+    public Route start() {
         long runtimeStart = System.currentTimeMillis();
 
-        for (int i = 0; i < Configuration.INSTANCE.maximumIterations; i++) {
+        this.logger.info("Parameters | " + this.parameters);
+
+        for (int i = 0; i < this.parameters.maximumIterations; i++) {
             Route currentBestTour = this.bestTour;
             moveAnts();
             updateTrails();
@@ -53,6 +57,7 @@ public class AntColonyOptimization {
 
         this.logger.info("Best tour | " + this.bestTour);
         this.logger.info("runtime | " + (System.currentTimeMillis() - runtimeStart) + " ms");
+        return this.bestTour;
     }
 
     private void moveAnts() {
@@ -70,7 +75,7 @@ public class AntColonyOptimization {
     }
 
     private int selectNextCity(Ant ant) {
-        if (Configuration.INSTANCE.randomGenerator.nextDouble() < Configuration.INSTANCE.randomFactor) {
+        if (Configuration.INSTANCE.randomGenerator.nextDouble() < this.parameters.randomFactor) {
             int randomCity = Configuration.INSTANCE.randomGenerator.nextInt(0, this.distanceMatrix.length - 1);
 
             if (!ant.trail.visited(randomCity)) {
@@ -107,7 +112,7 @@ public class AntColonyOptimization {
             if (!ant.trail.visited(l)) {
                 // TODO: Mit Herrn Müller besprechen, wie wir damit umgehen sollen
                 if (this.distanceMatrix[i][l] == 0) continue;
-                pheromone += Math.pow(this.trails[i][l], Configuration.INSTANCE.alpha) * Math.pow(1.0 / this.distanceMatrix[i][l], Configuration.INSTANCE.beta);
+                pheromone += Math.pow(this.trails[i][l], this.parameters.alpha) * Math.pow(1.0 / this.distanceMatrix[i][l], this.parameters.beta);
             }
         }
 
@@ -121,7 +126,7 @@ public class AntColonyOptimization {
                     throw new RuntimeException("Error while calculation probabilities. Division with infinity.");
                 }
 
-                double numerator = Math.pow(trails[i][j], Configuration.INSTANCE.alpha) * Math.pow(1.0 / this.distanceMatrix[i][j], Configuration.INSTANCE.beta);
+                double numerator = Math.pow(trails[i][j], this.parameters.alpha) * Math.pow(1.0 / this.distanceMatrix[i][j], this.parameters.beta);
                 probabilities[j] = numerator / pheromone;
             }
         }
@@ -133,12 +138,12 @@ public class AntColonyOptimization {
         // evaporate trails
         for (int i = 0; i < this.distanceMatrix.length; i++) {
             for (int j = 0; j < this.distanceMatrix[0].length; j++) {
-                this.trails[i][j] *= Configuration.INSTANCE.evaporation;
+                this.trails[i][j] *= this.parameters.evaporation;
             }
         }
 
         for (Ant ant : this.ants) {
-            double contribution = Configuration.INSTANCE.q / ant.trail.getTotalCost();
+            double contribution = this.parameters.q / ant.trail.getTotalCost();
             for (int i = 0; i < this.distanceMatrix.length - 1; i++) {
                 this.trails[ant.trail.get(i)][ant.trail.get(i + 1)] += contribution;
             }
