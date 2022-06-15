@@ -166,9 +166,11 @@ public class AntColonyOptimization {
         double bestTourCost = this.bestTour != null ? this.bestTour.getTotalCost() : Integer.MAX_VALUE;
 
         for (Ant ant : this.ants) {
-            if (ant.trail.getTotalCost() < bestTourCost) {
+            double antTrailCost = ant.trail.getTotalCost();
+
+            if (antTrailCost < bestTourCost) {
                 this.bestTour = new Route(ant.trail);
-                bestTourCost = this.bestTour.getTotalCost();
+                bestTourCost = antTrailCost;
             }
         }
     }
