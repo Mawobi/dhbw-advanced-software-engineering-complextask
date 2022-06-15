@@ -8,18 +8,24 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class AntColonyOptimization {
     private final double[][] distanceMatrix;
     private final double[][] trails;
     private final List<Ant> ants = new ArrayList<>();
+    private final ExecutorService executorService;
+    private Route bestTour;
     private final ACOParameters parameters;
     private FileSystemLogger logger;
-    private Route bestTour;
 
     public AntColonyOptimization(ACOParameters parameters, boolean silentLogs) throws IOException {
         this.parameters = parameters;
         if (!silentLogs) this.logger = new FileSystemLogger(AntColonyOptimization.class.getName());
+        this.executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
         TSPFileReader tspFileReader = new TSPFileReader();
         this.distanceMatrix = tspFileReader.readTSPData();
@@ -43,15 +49,17 @@ public class AntColonyOptimization {
         this.logger.info(msg);
     }
 
-
-    public Route start() {
+    public Route start() throws InterruptedException {
         long runtimeStart = System.currentTimeMillis();
-
+        log("Starting ACO with " + ((ThreadPoolExecutor) this.executorService).getMaximumPoolSize() + " processors");
         log("Parameters | " + this.parameters);
 
         for (int i = 0; i < this.parameters.maximumIterations; i++) {
             Route currentBestTour = this.bestTour;
+
+            // move ants in parallel
             moveAnts();
+
             updateTrails();
             updateBest();
 
@@ -60,23 +68,31 @@ public class AntColonyOptimization {
             }
         }
 
+        this.executorService.shutdown();
         log("Best tour | " + this.bestTour);
         log("runtime | " + (System.currentTimeMillis() - runtimeStart) + " ms");
         return this.bestTour;
     }
 
-    private void moveAnts() {
+    private void moveAnts() throws InterruptedException {
+        List<Callable<String>> callableTasks = new ArrayList<>();
+
         for (Ant ant : ants) {
-            ant.trail.clear();
+            callableTasks.add(() -> {
+                ant.trail.clear();
 
-            // it does not care which city is visited first, but to speed up calculation
-            // we will use 0 instead of a random generated value
-            ant.trail.visitCity(0);
+                // it does not care which city is visited first, but to speed up calculation
+                // we will use 0 instead of a random generated value
+                ant.trail.visitCity(0);
 
-            for (int i = 0; i < this.distanceMatrix.length - 1; i++) {
-                ant.trail.visitCity(selectNextCity(ant));
-            }
+                for (int i = 0; i < this.distanceMatrix.length - 1; i++) {
+                    ant.trail.visitCity(selectNextCity(ant));
+                }
+                return null;
+            });
         }
+
+        this.executorService.invokeAll(callableTasks);
     }
 
     private int selectNextCity(Ant ant) {
@@ -161,9 +177,11 @@ public class AntColonyOptimization {
         double bestTourCost = this.bestTour != null ? this.bestTour.getTotalCost() : Integer.MAX_VALUE;
 
         for (Ant ant : this.ants) {
-            if (ant.trail.getTotalCost() < bestTourCost) {
+            double antTrailCost = ant.trail.getTotalCost();
+
+            if (antTrailCost < bestTourCost) {
                 this.bestTour = new Route(ant.trail);
-                bestTourCost = this.bestTour.getTotalCost();
+                bestTourCost = antTrailCost;
             }
         }
     }
