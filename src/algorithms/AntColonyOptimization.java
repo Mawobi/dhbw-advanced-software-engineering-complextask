@@ -8,17 +8,21 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class AntColonyOptimization {
     private final FileSystemLogger logger;
     private final double[][] distanceMatrix;
     private final double[][] trails;
     private final List<Ant> ants = new ArrayList<>();
-
+    private final ExecutorService executorService;
     private Route bestTour;
 
     public AntColonyOptimization() throws IOException {
         this.logger = new FileSystemLogger(AntColonyOptimization.class.getName());
+        this.executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
         TSPFileReader tspFileReader = new TSPFileReader();
         this.distanceMatrix = tspFileReader.readTSPData();
@@ -37,12 +41,15 @@ public class AntColonyOptimization {
         }
     }
 
-    public void start() {
+    public void start() throws InterruptedException {
         long runtimeStart = System.currentTimeMillis();
 
         for (int i = 0; i < Configuration.INSTANCE.maximumIterations; i++) {
             Route currentBestTour = this.bestTour;
+
+            // move ants in parallel
             moveAnts();
+
             updateTrails();
             updateBest();
 
@@ -51,22 +58,30 @@ public class AntColonyOptimization {
             }
         }
 
+        this.executorService.shutdown();
         this.logger.info("Best tour | " + this.bestTour);
         this.logger.info("runtime | " + (System.currentTimeMillis() - runtimeStart) + " ms");
     }
 
-    private void moveAnts() {
+    private void moveAnts() throws InterruptedException {
+        List<Callable<String>> callableTasks = new ArrayList<>();
+
         for (Ant ant : ants) {
-            ant.trail.clear();
+            callableTasks.add(() -> {
+                ant.trail.clear();
 
-            // it does not care which city is visited first, but to speed up calculation
-            // we will use 0 instead of a random generated value
-            ant.trail.visitCity(0);
+                // it does not care which city is visited first, but to speed up calculation
+                // we will use 0 instead of a random generated value
+                ant.trail.visitCity(0);
 
-            for (int i = 0; i < this.distanceMatrix.length - 1; i++) {
-                ant.trail.visitCity(selectNextCity(ant));
-            }
+                for (int i = 0; i < this.distanceMatrix.length - 1; i++) {
+                    ant.trail.visitCity(selectNextCity(ant));
+                }
+                return null;
+            });
         }
+
+        this.executorService.invokeAll(callableTasks);
     }
 
     private int selectNextCity(Ant ant) {
@@ -106,15 +121,20 @@ public class AntColonyOptimization {
         for (int l = 0; l < this.distanceMatrix.length; l++) {
             if (!ant.trail.visited(l)) {
                 // TODO: Mit Herrn Müller besprechen, wie wir damit umgehen sollen
-                if (this.distanceMatrix[i][l] == 0) continue;
-                pheromone += Math.pow(this.trails[i][l], Configuration.INSTANCE.alpha) * Math.pow(1.0 / this.distanceMatrix[i][l], Configuration.INSTANCE.beta);
+                double distance = this.distanceMatrix[i][l];
+                if (distance == 0) distance = 0.01;
+                pheromone += Math.pow(this.trails[i][l], Configuration.INSTANCE.alpha) * Math.pow(1.0 / distance, Configuration.INSTANCE.beta);
             }
         }
 
         for (int j = 0; j < probabilities.length; j++) {
             if (!ant.trail.visited(j)) {
-                if (pheromone == 0 || Double.isInfinite(pheromone)) {
-                    throw new RuntimeException("Error while calculation probabilities. Division with zero or infinity.");
+                // TODO: ggf. bei 0 probabilities[j] = 0 und bei infinity probabilities[j] = 1
+                if (pheromone == 0) {
+                    throw new RuntimeException("Error while calculation probabilities. Division with zero.");
+                }
+                if (Double.isInfinite(pheromone)) {
+                    throw new RuntimeException("Error while calculation probabilities. Division with infinity.");
                 }
 
                 double numerator = Math.pow(trails[i][j], Configuration.INSTANCE.alpha) * Math.pow(1.0 / this.distanceMatrix[i][j], Configuration.INSTANCE.beta);
@@ -146,9 +166,11 @@ public class AntColonyOptimization {
         double bestTourCost = this.bestTour != null ? this.bestTour.getTotalCost() : Integer.MAX_VALUE;
 
         for (Ant ant : this.ants) {
-            if (ant.trail.getTotalCost() < bestTourCost) {
+            double antTrailCost = ant.trail.getTotalCost();
+
+            if (antTrailCost < bestTourCost) {
                 this.bestTour = new Route(ant.trail);
-                bestTourCost = this.bestTour.getTotalCost();
+                bestTourCost = antTrailCost;
             }
         }
     }
