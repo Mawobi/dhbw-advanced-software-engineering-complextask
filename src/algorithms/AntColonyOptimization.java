@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class AntColonyOptimization {
     private final FileSystemLogger logger;
@@ -43,6 +44,7 @@ public class AntColonyOptimization {
 
     public void start() throws InterruptedException {
         long runtimeStart = System.currentTimeMillis();
+        this.logger.info("Starting ACO with " + ((ThreadPoolExecutor) this.executorService).getMaximumPoolSize() + " processors");
 
         for (int i = 0; i < Configuration.INSTANCE.maximumIterations; i++) {
             Route currentBestTour = this.bestTour;
