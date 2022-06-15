@@ -11,18 +11,19 @@ public class ACOParameterOptimizer {
         this.logger = new FileSystemLogger(ACOParameterOptimizer.class.getName());
     }
 
-    public void start() throws IOException {
+    public void start() throws IOException, InterruptedException {
+        long runtimeStart = System.currentTimeMillis();
         ACOParameters bestParameters = null;
         Route bestRoute = null;
 
-        for (double initialPheromoneValue = 0; initialPheromoneValue <= 1; initialPheromoneValue += 0.1) {
-            for (double alpha = 0; alpha <= 2; alpha += 0.1) {
-                for (double beta = 0; beta <= 2; beta += 0.1) {
-                    for (double evaporation = 0; evaporation <= 1; evaporation += 0.05) {
-                        for (int q = 1; q <= 1000; q += 100) {
-                            for (double antFactor = 0.1; antFactor <= 1; antFactor += 0.1) {
-                                for (double randomFactor = 0; randomFactor <= 0.1; randomFactor += 0.005) {
-                                    for (int maximumIterations = 1; maximumIterations <= 100; maximumIterations++) {
+        for (double initialPheromoneValue = 0.1; initialPheromoneValue <= 1; initialPheromoneValue += 0.1) {
+            for (double randomFactor = 0.005; randomFactor <= 0.1; randomFactor += 0.005) {
+                for (double evaporation = 0.05; evaporation <= 1; evaporation += 0.05) {
+                    for (int q = 100; q <= 1000; q += 100) {
+                        for (double alpha = 0.1; alpha <= 2; alpha += 0.1) {
+                            for (double beta = 0.1; beta <= 2; beta += 0.1) {
+                                for (double antFactor = 0.1; antFactor <= 1; antFactor += 0.1) {
+                                    for (int maximumIterations = 1; maximumIterations <= 12; maximumIterations++) {
                                         ACOParameters parameters = new ACOParameters(initialPheromoneValue, alpha, beta, evaporation, q, antFactor, randomFactor, maximumIterations);
                                         AntColonyOptimization aco = new AntColonyOptimization(parameters, true);
                                         Route route = aco.start();
@@ -43,5 +44,6 @@ public class ACOParameterOptimizer {
         }
 
         this.logger.info("Final optimized ACO parameters | " + bestParameters);
+        this.logger.info("runtime | " + (System.currentTimeMillis() - runtimeStart) + " ms");
     }
 }
