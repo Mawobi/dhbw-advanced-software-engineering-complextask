@@ -8,9 +8,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class AntColonyOptimization {
+
     private final FileSystemLogger logger;
+    private final ExecutorService executorService;
+    private CountDownLatch countDownLatch;
     private final double[][] distanceMatrix;
     private final double[][] trails;
     private final List<Ant> ants = new ArrayList<>();
@@ -19,6 +25,7 @@ public class AntColonyOptimization {
 
     public AntColonyOptimization() throws IOException {
         this.logger = new FileSystemLogger(AntColonyOptimization.class.getName());
+        this.executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1);
 
         TSPFileReader tspFileReader = new TSPFileReader();
         this.distanceMatrix = tspFileReader.readTSPData();
@@ -42,9 +49,16 @@ public class AntColonyOptimization {
 
         for (int i = 0; i < Configuration.INSTANCE.maximumIterations; i++) {
             Route currentBestTour = this.bestTour;
+
             moveAnts();
-            updateTrails();
-            updateBest();
+
+            // this.executorService.submit(() -> {
+                updateTrails();
+            // });
+
+            // this.executorService.submit(() -> {
+                updateBest();
+            // });
 
             if (currentBestTour != null && this.bestTour.getTotalCost() < currentBestTour.getTotalCost()) {
                 this.logger.info("Found new best | Iteration " + i + " | " + this.bestTour);
@@ -56,20 +70,29 @@ public class AntColonyOptimization {
     }
 
     private void moveAnts() {
+        this.countDownLatch = new CountDownLatch(ants.size());
         for (Ant ant : ants) {
-            ant.trail.clear();
-
-            // it does not care which city is visited first, but to speed up calculation
-            // we will use 0 instead of a random generated value
-            ant.trail.visitCity(0);
-
-            for (int i = 0; i < this.distanceMatrix.length - 1; i++) {
-                ant.trail.visitCity(selectNextCity(ant));
-            }
+            executorService.submit(() -> {
+                moveAnt(ant);
+            });
         }
+        waitForCountDownLatch();
     }
 
-    private int selectNextCity(Ant ant) {
+    private void moveAnt(Ant ant) {
+        ant.trail.clear();
+
+        // it does not care which city is visited first, but to speed up calculation
+        // we will use 0 instead of a random generated value
+        ant.trail.visitCity(0);
+
+        for (int i = 0; i < this.distanceMatrix.length - 1; i++) {
+            ant.trail.visitCity(selectNextCity(ant));
+        }
+        countDownLatch();
+    }
+
+    private synchronized int selectNextCity(Ant ant) {
         if (Configuration.INSTANCE.randomGenerator.nextDouble() < Configuration.INSTANCE.randomFactor) {
             int randomCity = Configuration.INSTANCE.randomGenerator.nextInt(0, this.distanceMatrix.length - 1);
 
@@ -129,27 +152,47 @@ public class AntColonyOptimization {
         // evaporate trails
         for (int i = 0; i < this.distanceMatrix.length; i++) {
             for (int j = 0; j < this.distanceMatrix[0].length; j++) {
-                this.trails[i][j] *= Configuration.INSTANCE.evaporation;
+                synchronized (this.trails) {
+                    this.trails[i][j] *= Configuration.INSTANCE.evaporation;
+                }
             }
         }
 
         for (Ant ant : this.ants) {
             double contribution = Configuration.INSTANCE.q / ant.trail.getTotalCost();
             for (int i = 0; i < this.distanceMatrix.length - 1; i++) {
-                this.trails[ant.trail.get(i)][ant.trail.get(i + 1)] += contribution;
+                synchronized (this.trails) {
+                    this.trails[ant.trail.get(i)][ant.trail.get(i + 1)] += contribution;
+                }
             }
-            this.trails[ant.trail.get(this.distanceMatrix.length - 1)][ant.trail.get(0)] += contribution;
+            synchronized (this.trails) {
+                this.trails[ant.trail.get(this.distanceMatrix.length - 1)][ant.trail.get(0)] += contribution;
+            }
         }
     }
 
-    private void updateBest() {
+    private synchronized void updateBest() {
         double bestTourCost = this.bestTour != null ? this.bestTour.getTotalCost() : Integer.MAX_VALUE;
-
         for (Ant ant : this.ants) {
             if (ant.trail.getTotalCost() < bestTourCost) {
                 this.bestTour = new Route(ant.trail);
                 bestTourCost = this.bestTour.getTotalCost();
             }
+        }
+    }
+
+    private void countDownLatch() {
+        if (countDownLatch != null) {
+            countDownLatch.countDown();
+        }
+    }
+
+    private void waitForCountDownLatch() {
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            this.logger.error("CountDownLatch | Fehler beim Wartevorgang!");
+            throw new RuntimeException(e);
         }
     }
 }
