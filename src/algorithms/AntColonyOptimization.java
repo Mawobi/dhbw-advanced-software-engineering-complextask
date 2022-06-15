@@ -113,12 +113,8 @@ public class AntColonyOptimization {
 
         for (int j = 0; j < probabilities.length; j++) {
             if (!ant.trail.visited(j)) {
-                // TODO: ggf. bei 0 probabilities[j] = 0 und bei infinity probabilities[j] = 1
-                if (pheromone == 0) {
-                    throw new RuntimeException("Error while calculation probabilities. Division with zero.");
-                }
-                if (Double.isInfinite(pheromone)) {
-                    throw new RuntimeException("Error while calculation probabilities. Division with infinity.");
+                if (pheromone == 0 || Double.isInfinite(pheromone)) {
+                    throw new RuntimeException("Error while calculation probabilities. Division with zero or infinity.");
                 }
 
                 double numerator = Math.pow(trails[i][j], Configuration.INSTANCE.alpha) * Math.pow(1.0 / this.distanceMatrix[i][j], Configuration.INSTANCE.beta);
