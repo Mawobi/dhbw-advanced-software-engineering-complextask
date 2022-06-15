@@ -1,4 +1,4 @@
-package util;
+package algorithms;
 
 public class ACOParameters {
     public final double initialPheromoneValue;

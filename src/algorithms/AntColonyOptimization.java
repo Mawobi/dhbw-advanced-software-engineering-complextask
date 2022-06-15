@@ -1,6 +1,5 @@
 package algorithms;
 
-import util.ACOParameters;
 import util.Configuration;
 import util.FileSystemLogger;
 import util.TSPFileReader;
@@ -11,16 +10,16 @@ import java.util.Arrays;
 import java.util.List;
 
 public class AntColonyOptimization {
-    private final FileSystemLogger logger;
     private final double[][] distanceMatrix;
     private final double[][] trails;
     private final List<Ant> ants = new ArrayList<>();
     private final ACOParameters parameters;
+    private FileSystemLogger logger;
     private Route bestTour;
 
-    public AntColonyOptimization(ACOParameters parameters) throws IOException {
+    public AntColonyOptimization(ACOParameters parameters, boolean silentLogs) throws IOException {
         this.parameters = parameters;
-        this.logger = new FileSystemLogger(AntColonyOptimization.class.getName());
+        if (!silentLogs) this.logger = new FileSystemLogger(AntColonyOptimization.class.getName());
 
         TSPFileReader tspFileReader = new TSPFileReader();
         this.distanceMatrix = tspFileReader.readTSPData();
@@ -39,10 +38,16 @@ public class AntColonyOptimization {
         }
     }
 
+    private void log(String msg) {
+        if (this.logger == null) return;
+        this.logger.info(msg);
+    }
+
+
     public Route start() {
         long runtimeStart = System.currentTimeMillis();
 
-        this.logger.info("Parameters | " + this.parameters);
+        log("Parameters | " + this.parameters);
 
         for (int i = 0; i < this.parameters.maximumIterations; i++) {
             Route currentBestTour = this.bestTour;
@@ -51,12 +56,12 @@ public class AntColonyOptimization {
             updateBest();
 
             if (currentBestTour != null && this.bestTour.getTotalCost() < currentBestTour.getTotalCost()) {
-                this.logger.info("Found new best | Iteration " + i + " | " + this.bestTour);
+                log("Found new best | Iteration " + i + " | " + this.bestTour);
             }
         }
 
-        this.logger.info("Best tour | " + this.bestTour);
-        this.logger.info("runtime | " + (System.currentTimeMillis() - runtimeStart) + " ms");
+        log("Best tour | " + this.bestTour);
+        log("runtime | " + (System.currentTimeMillis() - runtimeStart) + " ms");
         return this.bestTour;
     }
 
@@ -111,8 +116,9 @@ public class AntColonyOptimization {
         for (int l = 0; l < this.distanceMatrix.length; l++) {
             if (!ant.trail.visited(l)) {
                 // TODO: Mit Herrn Müller besprechen, wie wir damit umgehen sollen
-                if (this.distanceMatrix[i][l] == 0) continue;
-                pheromone += Math.pow(this.trails[i][l], this.parameters.alpha) * Math.pow(1.0 / this.distanceMatrix[i][l], this.parameters.beta);
+                double distance = this.distanceMatrix[i][l];
+                if (distance == 0) distance = 0.01;
+                pheromone += Math.pow(this.trails[i][l], this.parameters.alpha) * Math.pow(1.0 / distance, this.parameters.beta);
             }
         }
 
