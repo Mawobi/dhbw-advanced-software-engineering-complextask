@@ -28,9 +28,9 @@ public class ACOParameterOptimizer {
         int numberOfOptimizations = 3;
         ObjectMapper mapper = new ObjectMapper();
 
-        for (double evaporation = 1; evaporation >= 0.6; evaporation -= 0.1) {
-            for (double alpha = 8; alpha >= 3; alpha--) {
-                for (double beta = 8; beta >= 3; beta--) {
+        for (double evaporation = 0.6; evaporation <= 1; evaporation += 0.1) {
+            for (double alpha = 3; alpha <= 8; alpha++) {
+                for (double beta = 3; beta <= 8; beta++) {
                     for (double antFactor = 1; antFactor >= 0.6; antFactor -= 0.1) {
                         ACOParameters parameters = new ACOParameters(initialPheromoneValue, alpha, beta, evaporation, q, antFactor, randomFactor, maximumIterations);
                         double summedCosts = 0;
