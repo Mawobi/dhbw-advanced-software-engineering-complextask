@@ -7,8 +7,11 @@ public enum Configuration {
     public final MersenneTwisterFast randomGenerator = new MersenneTwisterFast(System.nanoTime());
 
     // File paths
-    public final String logDir = "logs";
-    public final String tspPath = "src/resources/a280.tsp";
+    public final String userDirectory = System.getProperty("user.dir");
+    public final String fileSeparator = System.getProperty("file.separator");
+    public final String logDir = userDirectory + fileSeparator + "logs";
+    public final String tspPath = userDirectory + fileSeparator + "src" + fileSeparator + "main" + fileSeparator + "resources" + fileSeparator + "a280.tsp";
+    public final String jsonDir = userDirectory + fileSeparator + "src" + fileSeparator + "main" + fileSeparator + "resources";
 
     // Algorithm parameters
     // Brute force:

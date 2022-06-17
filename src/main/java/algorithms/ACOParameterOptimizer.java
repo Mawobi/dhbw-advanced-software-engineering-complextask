@@ -1,7 +1,10 @@
 package algorithms;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import util.Configuration;
 import util.FileSystemLogger;
 
+import java.io.File;
 import java.io.IOException;
 
 public class ACOParameterOptimizer {
@@ -23,11 +26,12 @@ public class ACOParameterOptimizer {
         double randomFactor = 0.01;
 
         int numberOfOptimizations = 3;
+        ObjectMapper mapper = new ObjectMapper();
 
-        for (double evaporation = 0.6; evaporation <= 1; evaporation += 0.1) {
-            for (double alpha = 3; alpha <= 8; alpha++) {
-                for (double beta = 3; beta <= 8; beta++) {
-                    for (double antFactor = 0.6; antFactor <= 1; antFactor += 0.1) {
+        for (double evaporation = 1; evaporation >= 0.6; evaporation -= 0.1) {
+            for (double alpha = 8; alpha >= 3; alpha--) {
+                for (double beta = 8; beta >= 3; beta--) {
+                    for (double antFactor = 1; antFactor >= 0.6; antFactor -= 0.1) {
                         ACOParameters parameters = new ACOParameters(initialPheromoneValue, alpha, beta, evaporation, q, antFactor, randomFactor, maximumIterations);
                         double summedCosts = 0;
 
@@ -43,6 +47,8 @@ public class ACOParameterOptimizer {
                             bestParameters = parameters;
                             bestCost = averageCost;
                             this.logger.info("New best parameters | costs: " + averageCost + " | " + parameters);
+
+                            mapper.writeValue(new File(Configuration.INSTANCE.jsonDir + Configuration.INSTANCE.fileSeparator + "parameters.json"), bestParameters);
                         }
                     }
                 }
