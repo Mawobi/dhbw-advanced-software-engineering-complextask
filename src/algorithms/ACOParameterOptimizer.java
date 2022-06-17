@@ -15,26 +15,34 @@ public class ACOParameterOptimizer {
         long runtimeStart = System.currentTimeMillis();
         this.logger.info("Start parameter optimizer for ACO");
         ACOParameters bestParameters = null;
-        Route bestRoute = null;
+        double bestCost = Integer.MAX_VALUE;
 
         double initialPheromoneValue = 1.0;
-        int maximumIterations = 50;
+        int maximumIterations = 15;
         int q = 500;
         double randomFactor = 0.01;
 
-        for (double evaporation = 0.1; evaporation <= 1; evaporation += 0.1) {
-            for (double alpha = 1; alpha <= 6; alpha++) {
-                for (double beta = 1; beta <= 6; beta++) {
-                    for (double antFactor = 1; antFactor >= 0.4; antFactor -= 0.1) {
-                        ACOParameters parameters = new ACOParameters(initialPheromoneValue, alpha, beta, evaporation, q, antFactor, randomFactor, maximumIterations);
-                        AntColonyOptimization aco = new AntColonyOptimization(parameters, true);
-                        Route route = aco.start();
+        int numberOfOptimizations = 3;
 
-                        double routeCost = route.getTotalCost();
-                        if (bestRoute == null || bestRoute.getTotalCost() > routeCost) {
+        for (double evaporation = 0.6; evaporation <= 1; evaporation += 0.1) {
+            for (double alpha = 3; alpha <= 8; alpha++) {
+                for (double beta = 3; beta <= 8; beta++) {
+                    for (double antFactor = 0.6; antFactor <= 1; antFactor += 0.1) {
+                        ACOParameters parameters = new ACOParameters(initialPheromoneValue, alpha, beta, evaporation, q, antFactor, randomFactor, maximumIterations);
+                        double summedCosts = 0;
+
+                        for (int i = 0; i < numberOfOptimizations; i++) {
+                            AntColonyOptimization aco = new AntColonyOptimization(parameters, true);
+                            Route route = aco.start();
+                            summedCosts += route.getTotalCost();
+                        }
+
+                        double averageCost = summedCosts / numberOfOptimizations;
+
+                        if (averageCost < bestCost) {
                             bestParameters = parameters;
-                            bestRoute = route;
-                            this.logger.info("New best parameters | costs: " + routeCost + " | " + parameters);
+                            bestCost = averageCost;
+                            this.logger.info("New best parameters | costs: " + averageCost + " | " + parameters);
                         }
                     }
                 }
