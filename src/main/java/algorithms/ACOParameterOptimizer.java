@@ -21,7 +21,7 @@ public class ACOParameterOptimizer {
         double bestCost = Integer.MAX_VALUE;
 
         double initialPheromoneValue = 1.0;
-        int maximumIterations = 15;
+        int maximumIterations = 25;
         int q = 500;
         double randomFactor = 0.01;
 
