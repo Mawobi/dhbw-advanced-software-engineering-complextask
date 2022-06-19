@@ -2,9 +2,9 @@
   "initialPheromoneValue": 1.0,
   "alpha": 3.0,
   "beta": 6.0,
-  "evaporation": 0.8999999999999999,
+  "evaporation": 0.9,
   "q": 500.0,
   "antFactor": 0.9,
   "randomFactor": 0.01,
-  "maximumIterations": 50
+  "maximumIterations": 1000
 }
