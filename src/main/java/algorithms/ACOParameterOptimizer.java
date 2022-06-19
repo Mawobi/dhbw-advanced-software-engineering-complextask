@@ -1,3 +1,7 @@
+/**
+ * Matrikelnummern: 3110300 und 2858031
+ */
+
 package algorithms;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,7 +20,8 @@ public class ACOParameterOptimizer {
 
     /**
      * Starts the parameter optimization.
-     * @throws IOException if an error occurs while writing to the log file
+     *
+     * @throws IOException          if an error occurs while writing to the log file
      * @throws InterruptedException if the thread is interrupted
      */
     public void start() throws IOException, InterruptedException {

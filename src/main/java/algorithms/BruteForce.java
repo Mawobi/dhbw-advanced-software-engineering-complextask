@@ -1,3 +1,7 @@
+/**
+ * Matrikelnummern: 3110300 und 2858031
+ */
+
 package algorithms;
 
 import util.Configuration;
@@ -19,6 +23,7 @@ public class BruteForce {
 
     /**
      * Starts the Brute Force algorithm.
+     *
      * @throws FileNotFoundException if the tsp-data json file could not be read to initialize the distance matrix
      */
     public void start() throws FileNotFoundException {
@@ -48,6 +53,7 @@ public class BruteForce {
 
     /**
      * Refills the nodes pool with all nodes.
+     *
      * @param distanceMatrix distance matrix of the tsp nodes
      * @return a new Route with all nodes
      */
@@ -65,6 +71,7 @@ public class BruteForce {
 
     /**
      * Refills the nodes pool with all nodes.
+     *
      * @param dimension dimension of the distance matrix
      */
     private void refillNodesPool(int dimension) {
@@ -76,6 +83,7 @@ public class BruteForce {
 
     /**
      * Returns a random node from the nodes pool.
+     *
      * @return a random node from the nodes pool
      */
     private int getRandomNodeFromPool() {

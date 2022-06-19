@@ -1,3 +1,7 @@
+/**
+ * Matrikelnummern: 3110300 und 2858031
+ */
+
 package algorithms;
 
 import util.Configuration;
@@ -26,6 +30,7 @@ public class Route {
 
     /**
      * Calculates the total cost of the route.
+     *
      * @return the total cost of the route
      */
     public double getTotalCost() {
@@ -41,6 +46,7 @@ public class Route {
 
     /**
      * Adds a city to the route.
+     *
      * @param city the city to add
      */
     public void visitCity(int city) {
@@ -49,6 +55,7 @@ public class Route {
 
     /**
      * Checks if the route contains a city / was already visited.
+     *
      * @param city the city to check
      * @return true if the city was already visited, false otherwise
      */
@@ -65,6 +72,7 @@ public class Route {
 
     /**
      * Returns the size of the Route.
+     *
      * @return the size of the Route
      */
     public int getSize() {
@@ -73,6 +81,7 @@ public class Route {
 
     /**
      * Gets the city at a specific index.
+     *
      * @param index the index of the city to return
      * @return the city at the given index
      */

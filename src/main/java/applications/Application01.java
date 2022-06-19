@@ -1,3 +1,7 @@
+/**
+ * Matrikelnummern: 3110300 und 2858031
+ */
+
 package applications;
 
 import algorithms.BruteForce;

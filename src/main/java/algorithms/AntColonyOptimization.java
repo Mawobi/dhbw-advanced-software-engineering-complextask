@@ -1,3 +1,7 @@
+/**
+ * Matrikelnummern: 3110300 und 2858031
+ */
+
 package algorithms;
 
 import util.Configuration;
@@ -19,8 +23,8 @@ public class AntColonyOptimization {
     private final double[][] trails;
     private final List<Ant> ants = new ArrayList<>();
     private final ExecutorService executorService;
-    private Route bestTour;
     private final ACOParameters parameters;
+    private Route bestTour;
     private FileSystemLogger logger;
 
     /**
@@ -54,6 +58,7 @@ public class AntColonyOptimization {
 
     /**
      * Starts the ACO algorithm.
+     *
      * @return the best route and the related best cost
      * @throws InterruptedException if the thread is interrupted
      */
@@ -85,6 +90,7 @@ public class AntColonyOptimization {
 
     /**
      * Moves all ants parallel in separate threads.
+     *
      * @throws InterruptedException if the thread is interrupted
      */
     private void moveAnts() throws InterruptedException {
@@ -110,6 +116,7 @@ public class AntColonyOptimization {
 
     /**
      * Selects the next city to visit for a specific ant.
+     *
      * @param ant the ant to select the next city for
      * @return the index of the next city
      */
@@ -139,6 +146,7 @@ public class AntColonyOptimization {
 
     /**
      * Calculates the probabilities for each city to be visited by a specific ant.
+     *
      * @param ant the ant to calculate the probabilities for
      * @return the probabilities for each city
      */
