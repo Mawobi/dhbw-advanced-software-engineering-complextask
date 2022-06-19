@@ -29,5 +29,5 @@ public enum Configuration {
     public final double q = 500;                // pheromone left on trail per ant
     public final double antFactor = 0.8;        // no ants per node
     public final double randomFactor = 0.01;    // introducing randomness
-    public final int maximumIterations = 500;
+    public final int maximumIterations = 750;
 }

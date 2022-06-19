@@ -6,5 +6,5 @@
   "q": 500.0,
   "antFactor": 0.8,
   "randomFactor": 0.01,
-  "maximumIterations": 500
+  "maximumIterations": 750
 }

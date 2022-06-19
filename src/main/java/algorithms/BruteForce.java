@@ -25,11 +25,10 @@ public class BruteForce {
         TSPFileReader tspFileReader = new TSPFileReader();
         double[][] distanceMatrix = tspFileReader.readTSPData();
 
-        Route bestRoute = getNewRandomRoute(distanceMatrix);
+        Route bestRoute = null;
 
         this.logger.info("=== Bruteforce TSP ===");
         this.logger.info("Starting " + Configuration.INSTANCE.bruteForceIterationCount + " iterations");
-        this.logger.info("Best costs:");
 
         // Brute Force iterations - update new best route if necessary
         for (int i = 0; i < Configuration.INSTANCE.bruteForceIterationCount; i++) {
@@ -37,9 +36,9 @@ public class BruteForce {
 
             Route route = getNewRandomRoute(distanceMatrix);
 
-            if (route.getTotalCost() < bestRoute.getTotalCost()) {
+            if (bestRoute == null || route.getTotalCost() < bestRoute.getTotalCost()) {
                 bestRoute = route;
-                logger.info("Iteration " + i + " | " + bestRoute.getTotalCost());
+                this.logger.info("Found new best | Iteration " + i + " | " + bestRoute);
             }
         }
 
