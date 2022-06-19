@@ -14,7 +14,7 @@ public class Application02 {
     public static void main(String[] args) throws IOException, InterruptedException {
         ACOParameters parameters = new ACOParameters(Configuration.INSTANCE.initialPheromoneValue, Configuration.INSTANCE.alpha, Configuration.INSTANCE.beta, Configuration.INSTANCE.evaporation, Configuration.INSTANCE.q, Configuration.INSTANCE.antFactor, Configuration.INSTANCE.randomFactor, Configuration.INSTANCE.maximumIterations);
 
-        // read cli arguments
+        // Read cli arguments
         HashMap<String, String> arguments = new HashMap<>();
 
         if (args.length % 2 != 0) {

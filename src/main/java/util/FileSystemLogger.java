@@ -39,7 +39,7 @@ public class FileSystemLogger {
     /**
      * Log an INFO message.
      *
-     * @param msg Message to log.
+     * @param msg message to log.
      */
     public void info(String msg) {
         logger.info(msg);
@@ -48,7 +48,7 @@ public class FileSystemLogger {
     /**
      * Log an WARNING message.
      *
-     * @param msg Message to log.
+     * @param msg message to log.
      */
     public void warning(String msg) {
         logger.warning(msg);
@@ -57,7 +57,7 @@ public class FileSystemLogger {
     /**
      * Log an ERROR message.
      *
-     * @param msg Message to log.
+     * @param msg message to log.
      */
     public void error(String msg) {
         logger.severe(msg);

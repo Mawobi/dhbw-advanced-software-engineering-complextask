@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
 public class AntColonyOptimization {
+    // Variable declarations
     private final double[][] distanceMatrix;
     private final double[][] trails;
     private final List<Ant> ants = new ArrayList<>();
@@ -22,6 +23,13 @@ public class AntColonyOptimization {
     private final ACOParameters parameters;
     private FileSystemLogger logger;
 
+    /**
+     * Initialisation of the Variables like executor service, distance matrix, trails and pheromone values.
+     *
+     * @param parameters ACO parameters from configuration or json file
+     * @param silentLogs if true, no logs are printed
+     * @throws IOException if tsp-data json file could not be read to initialize the distance matrix
+     */
     public AntColonyOptimization(ACOParameters parameters, boolean silentLogs) throws IOException {
         this.parameters = parameters;
         if (!silentLogs) this.logger = new FileSystemLogger(AntColonyOptimization.class.getName());
@@ -44,36 +52,41 @@ public class AntColonyOptimization {
         }
     }
 
-    private void log(String msg) {
-        if (this.logger == null) return;
-        this.logger.info(msg);
-    }
-
+    /**
+     * Starts the ACO algorithm.
+     * @return the best route and the related best cost
+     * @throws InterruptedException if the thread is interrupted
+     */
     public Route start() throws InterruptedException {
         long runtimeStart = System.currentTimeMillis();
-        log("Starting ACO with " + ((ThreadPoolExecutor) this.executorService).getMaximumPoolSize() + " processors");
+        log("Starting Ant Colony Optimization with " + ((ThreadPoolExecutor) this.executorService).getMaximumPoolSize() + " processors");
         log("Parameters | " + this.parameters);
 
         for (int i = 0; i < this.parameters.maximumIterations; i++) {
             Route currentBestTour = this.bestTour;
 
-            // move ants in parallel
             moveAnts();
 
             updateTrails();
             updateBest();
 
+            // Check and print if new best tour is found
             if (currentBestTour != null && this.bestTour.getTotalCost() < currentBestTour.getTotalCost()) {
                 log("Found new best | Iteration " + i + " | " + this.bestTour);
             }
         }
 
+        // shutdown executor service, print best tour and total runtime
         this.executorService.shutdown();
         log("Best tour | " + this.bestTour);
         log("runtime | " + (System.currentTimeMillis() - runtimeStart) + " ms");
         return this.bestTour;
     }
 
+    /**
+     * Moves all ants parallel in separate threads.
+     * @throws InterruptedException if the thread is interrupted
+     */
     private void moveAnts() throws InterruptedException {
         List<Callable<String>> callableTasks = new ArrayList<>();
 
@@ -81,7 +94,7 @@ public class AntColonyOptimization {
             callableTasks.add(() -> {
                 ant.trail.clear();
 
-                // it does not care which city is visited first, but to speed up calculation
+                // It does not care which city is visited first, but to speed up calculation
                 // we will use 0 instead of a random generated value
                 ant.trail.visitCity(0);
 
@@ -95,6 +108,11 @@ public class AntColonyOptimization {
         this.executorService.invokeAll(callableTasks);
     }
 
+    /**
+     * Selects the next city to visit for a specific ant.
+     * @param ant the ant to select the next city for
+     * @return the index of the next city
+     */
     private int selectNextCity(Ant ant) {
         if (Configuration.INSTANCE.randomGenerator.nextDouble() < this.parameters.randomFactor) {
             int randomCity = Configuration.INSTANCE.randomGenerator.nextInt(0, this.distanceMatrix.length - 1);
@@ -119,6 +137,11 @@ public class AntColonyOptimization {
         throw new RuntimeException("runtime exception | unable to select next city");
     }
 
+    /**
+     * Calculates the probabilities for each city to be visited by a specific ant.
+     * @param ant the ant to calculate the probabilities for
+     * @return the probabilities for each city
+     */
     public double[] calculateProbabilities(Ant ant) {
         double[] probabilities = new double[this.distanceMatrix.length];
 
@@ -131,7 +154,6 @@ public class AntColonyOptimization {
 
         for (int l = 0; l < this.distanceMatrix.length; l++) {
             if (!ant.trail.visited(l)) {
-                // TODO: Mit Herrn Müller besprechen, wie wir damit umgehen sollen
                 double distance = this.distanceMatrix[i][l];
                 if (distance == 0) distance = 0.01;
                 pheromone += Math.pow(this.trails[i][l], this.parameters.alpha) * Math.pow(1.0 / distance, this.parameters.beta);
@@ -140,7 +162,6 @@ public class AntColonyOptimization {
 
         for (int j = 0; j < probabilities.length; j++) {
             if (!ant.trail.visited(j)) {
-                // TODO: ggf. bei 0 probabilities[j] = 0 und bei infinity probabilities[j] = 1
                 if (pheromone == 0) {
                     throw new RuntimeException("Error while calculation probabilities. Division with zero.");
                 }
@@ -156,6 +177,9 @@ public class AntColonyOptimization {
         return probabilities;
     }
 
+    /**
+     * Updates pheromone concentration for each edge through evaporation and new applied pheromones.
+     */
     private void updateTrails() {
         // evaporate trails
         for (int i = 0; i < this.distanceMatrix.length; i++) {
@@ -173,6 +197,9 @@ public class AntColonyOptimization {
         }
     }
 
+    /**
+     * Checks if new best tour costs are found and updates the best tour if necessary.
+     */
     private void updateBest() {
         double bestTourCost = this.bestTour != null ? this.bestTour.getTotalCost() : Integer.MAX_VALUE;
 
@@ -184,5 +211,10 @@ public class AntColonyOptimization {
                 bestTourCost = antTrailCost;
             }
         }
+    }
+
+    private void log(String msg) {
+        if (this.logger == null) return;
+        this.logger.info(msg);
     }
 }

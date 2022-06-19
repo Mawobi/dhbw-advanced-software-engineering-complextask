@@ -3,6 +3,9 @@ package util;
 public enum Configuration {
     INSTANCE;
 
+    // Formatting
+    public final String decimalFormat = "0.00";
+
     // Random generator
     public final MersenneTwisterFast randomGenerator = new MersenneTwisterFast(System.nanoTime());
 
@@ -18,6 +21,7 @@ public enum Configuration {
     public final long bruteForceIterationCount = 100000000;
 
     // ACO:
+    // with these parameters the algorithm converges to the average cost of 2800-2900
     public final double initialPheromoneValue = 1;
     public final double alpha = 1;              // pheromone importance
     public final double beta = 5;               // distance priority

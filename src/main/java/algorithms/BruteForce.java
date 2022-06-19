@@ -17,6 +17,10 @@ public class BruteForce {
         this.nodesPool = new ArrayList<>();
     }
 
+    /**
+     * Starts the Brute Force algorithm.
+     * @throws FileNotFoundException if the tsp-data json file could not be read to initialize the distance matrix
+     */
     public void start() throws FileNotFoundException {
         TSPFileReader tspFileReader = new TSPFileReader();
         double[][] distanceMatrix = tspFileReader.readTSPData();
@@ -27,6 +31,7 @@ public class BruteForce {
         this.logger.info("Starting " + Configuration.INSTANCE.bruteForceIterationCount + " iterations");
         this.logger.info("Best costs:");
 
+        // Brute Force iterations - update new best route if necessary
         for (int i = 0; i < Configuration.INSTANCE.bruteForceIterationCount; i++) {
             refillNodesPool(distanceMatrix.length);
 
@@ -42,6 +47,11 @@ public class BruteForce {
         this.logger.info("=== Bruteforce TSP End ===");
     }
 
+    /**
+     * Refills the nodes pool with all nodes.
+     * @param distanceMatrix distance matrix of the tsp nodes
+     * @return a new Route with all nodes
+     */
     private Route getNewRandomRoute(double[][] distanceMatrix) {
         int[] nodeOrder = new int[distanceMatrix.length];
 
@@ -54,6 +64,10 @@ public class BruteForce {
         return new Route(nodeOrder, distanceMatrix);
     }
 
+    /**
+     * Refills the nodes pool with all nodes.
+     * @param dimension dimension of the distance matrix
+     */
     private void refillNodesPool(int dimension) {
         this.nodesPool.clear();
         for (int i = 0; i < dimension; i++) {
@@ -61,6 +75,10 @@ public class BruteForce {
         }
     }
 
+    /**
+     * Returns a random node from the nodes pool.
+     * @return a random node from the nodes pool
+     */
     private int getRandomNodeFromPool() {
         if (this.nodesPool.size() == 0) return -1;
         return this.nodesPool.remove(Configuration.INSTANCE.randomGenerator.nextInt(0, nodesPool.size() - 1));

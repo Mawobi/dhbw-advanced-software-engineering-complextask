@@ -3,6 +3,7 @@ package util;
 import java.io.Serial;
 import java.io.Serializable;
 
+// Really good random number generator!
 public class MersenneTwisterFast implements Serializable, Cloneable {
     @Serial
     private static final long serialVersionUID = -8219700664442619525L;

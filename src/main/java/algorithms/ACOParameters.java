@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+// Data Class for the ACO Parameters
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
